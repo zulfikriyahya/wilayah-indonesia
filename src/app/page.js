@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Moon,
   Sun,
@@ -13,8 +13,36 @@ import {
 } from "lucide-react";
 
 export default function ApiDocs() {
-  const [isDark, setIsDark] = useState(true);
+  const [theme, setTheme] = useState("system");
   const [copiedEndpoint, setCopiedEndpoint] = useState(null);
+
+  useEffect(() => {
+    // Load saved theme or use system preference
+    const savedTheme = localStorage.getItem("theme") || "system";
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
+  }, []);
+
+  const applyTheme = (newTheme) => {
+    const root = document.documentElement;
+
+    if (newTheme === "system") {
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      root.classList.toggle("dark", systemPrefersDark);
+    } else {
+      root.classList.toggle("dark", newTheme === "dark");
+    }
+  };
+
+  const toggleTheme = () => {
+    const newTheme =
+      theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    applyTheme(newTheme);
+  };
 
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text);
@@ -200,47 +228,38 @@ export default function ApiDocs() {
     },
   ];
 
-  const theme = {
-    bg: isDark ? "bg-gray-900" : "bg-gray-50",
-    cardBg: isDark ? "bg-gray-800" : "bg-white",
-    text: isDark ? "text-gray-100" : "text-gray-900",
-    textSecondary: isDark ? "text-gray-400" : "text-gray-600",
-    border: isDark ? "border-gray-700" : "border-gray-200",
-    codeBg: isDark ? "bg-gray-900" : "bg-gray-100",
-    accentBg: isDark ? "bg-blue-900/30" : "bg-blue-50",
-    accentText: isDark ? "text-blue-400" : "text-blue-600",
-    hover: isDark ? "hover:bg-gray-700" : "hover:bg-gray-100",
+  const getThemeIcon = () => {
+    if (theme === "light") return <Sun size={20} />;
+    if (theme === "dark") return <Moon size={20} />;
+    return (
+      <div className="relative">
+        <Sun size={20} className="absolute" />
+        <Moon size={20} className="opacity-50" />
+      </div>
+    );
   };
 
   return (
-    <div
-      className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300`}
-    >
+    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Header */}
-      <header
-        className={`sticky top-0 z-50 backdrop-blur-lg ${
-          isDark ? "bg-gray-800/80" : "bg-white/80"
-        } border-b ${theme.border}`}
-      >
+      <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Database
-              className={isDark ? "text-blue-400" : "text-blue-600"}
-              size={32}
-            />
+            <Database className="text-blue-600 dark:text-blue-400" size={32} />
             <div>
               <h1 className="text-2xl font-bold">API Wilayah Indonesia</h1>
-              <p className={`text-sm ${theme.textSecondary}`}>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 RESTful API untuk data wilayah administratif Indonesia
               </p>
             </div>
           </div>
           <button
-            onClick={() => setIsDark(!isDark)}
-            className={`p-3 rounded-lg ${theme.hover} transition-colors`}
+            onClick={toggleTheme}
+            className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Toggle theme"
+            title={`Current: ${theme}`}
           >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            {getThemeIcon()}
           </button>
         </div>
       </header>
@@ -248,28 +267,21 @@ export default function ApiDocs() {
       <main className="max-w-7xl mx-auto px-6 py-12">
         {/* Quick Start */}
         <section className="mb-16">
-          <div
-            className={`${theme.cardBg} rounded-xl p-8 shadow-lg border ${theme.border}`}
-          >
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-4">
-              <Code
-                className={isDark ? "text-green-400" : "text-green-600"}
-                size={24}
-              />
+              <Code className="text-green-600 dark:text-green-400" size={24} />
               <h2 className="text-2xl font-bold">Quick Start</h2>
             </div>
-            <p className={`${theme.textSecondary} mb-6`}>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Base URL untuk semua endpoint:
             </p>
-            <div
-              className={`${theme.codeBg} rounded-lg p-4 font-mono text-sm ${theme.accentText} flex items-center justify-between`}
-            >
+            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 font-mono text-sm text-blue-600 dark:text-blue-400 flex items-center justify-between">
               <code>http://localhost:3000</code>
               <button
                 onClick={() =>
                   copyToClipboard("http://localhost:3000", "base-url")
                 }
-                className={`p-2 rounded ${theme.hover} transition-colors`}
+                className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
                 {copiedEndpoint === "base-url" ? (
                   <Check size={16} />
@@ -285,7 +297,7 @@ export default function ApiDocs() {
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-6">
             <MapPin
-              className={isDark ? "text-purple-400" : "text-purple-600"}
+              className="text-purple-600 dark:text-purple-400"
               size={28}
             />
             <h2 className="text-3xl font-bold">Endpoints</h2>
@@ -295,7 +307,7 @@ export default function ApiDocs() {
             {endpoints.map((endpoint) => (
               <div
                 key={endpoint.id}
-                className={`${theme.cardBg} rounded-xl shadow-lg border ${theme.border} overflow-hidden`}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
               >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -303,27 +315,21 @@ export default function ApiDocs() {
                       <h3 className="text-xl font-bold mb-2">
                         {endpoint.id}. {endpoint.title}
                       </h3>
-                      <p className={theme.textSecondary}>
+                      <p className="text-gray-600 dark:text-gray-400">
                         {endpoint.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Method & Path */}
-                  <div
-                    className={`${theme.codeBg} rounded-lg p-4 mb-4 flex items-center justify-between`}
-                  >
+                  <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 font-mono text-sm">
-                      <span
-                        className={`px-3 py-1 rounded font-bold ${
-                          isDark
-                            ? "bg-green-900 text-green-300"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
+                      <span className="px-3 py-1 rounded font-bold bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                         {endpoint.method}
                       </span>
-                      <code className={theme.accentText}>{endpoint.path}</code>
+                      <code className="text-blue-600 dark:text-blue-400">
+                        {endpoint.path}
+                      </code>
                     </div>
                     <button
                       onClick={() =>
@@ -332,7 +338,7 @@ export default function ApiDocs() {
                           `endpoint-${endpoint.id}`
                         )
                       }
-                      className={`p-2 rounded ${theme.hover} transition-colors`}
+                      className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     >
                       {copiedEndpoint === `endpoint-${endpoint.id}` ? (
                         <Check size={16} />
@@ -349,30 +355,25 @@ export default function ApiDocs() {
                         <Search size={16} />
                         Query Parameters:
                       </h4>
-                      <div
-                        className={`${theme.accentBg} rounded-lg p-4 space-y-2`}
-                      >
+                      <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 space-y-2">
                         {endpoint.params.map((param, idx) => (
-                          <div key={idx} className="flex gap-2">
-                            <code
-                              className={`${theme.accentText} font-mono text-sm`}
-                            >
+                          <div
+                            key={idx}
+                            className="flex gap-2 flex-wrap items-center"
+                          >
+                            <code className="text-blue-600 dark:text-blue-400 font-mono text-sm">
                               {param.name}
                             </code>
                             <span
                               className={`text-xs px-2 py-0.5 rounded ${
                                 param.type === "required"
-                                  ? isDark
-                                    ? "bg-red-900 text-red-300"
-                                    : "bg-red-100 text-red-700"
-                                  : isDark
-                                  ? "bg-gray-700 text-gray-300"
-                                  : "bg-gray-200 text-gray-700"
+                                  ? "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300"
+                                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                               }`}
                             >
                               {param.type}
                             </span>
-                            <span className={`${theme.textSecondary} text-sm`}>
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">
                               - {param.desc}
                             </span>
                           </div>
@@ -384,9 +385,7 @@ export default function ApiDocs() {
                   {/* Example Response */}
                   <div>
                     <h4 className="font-semibold mb-3">Example Response:</h4>
-                    <div
-                      className={`${theme.codeBg} rounded-lg p-4 overflow-x-auto`}
-                    >
+                    <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto">
                       <pre className="font-mono text-xs">
                         <code>{endpoint.example}</code>
                       </pre>
@@ -401,31 +400,21 @@ export default function ApiDocs() {
         {/* Level Kode Wilayah */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-6">Level Kode Wilayah</h2>
-          <div
-            className={`${theme.cardBg} rounded-xl shadow-lg border ${theme.border} overflow-hidden`}
-          >
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className={isDark ? "bg-gray-700" : "bg-gray-100"}>
+                <thead className="bg-gray-100 dark:bg-gray-700">
                   <tr>
-                    <th
-                      className={`px-6 py-4 text-left font-semibold ${theme.border} border-b`}
-                    >
+                    <th className="px-6 py-4 text-left font-semibold border-b border-gray-200 dark:border-gray-700">
                       Level
                     </th>
-                    <th
-                      className={`px-6 py-4 text-left font-semibold ${theme.border} border-b`}
-                    >
+                    <th className="px-6 py-4 text-left font-semibold border-b border-gray-200 dark:border-gray-700">
                       Panjang Kode
                     </th>
-                    <th
-                      className={`px-6 py-4 text-left font-semibold ${theme.border} border-b`}
-                    >
+                    <th className="px-6 py-4 text-left font-semibold border-b border-gray-200 dark:border-gray-700">
                       Contoh
                     </th>
-                    <th
-                      className={`px-6 py-4 text-left font-semibold ${theme.border} border-b`}
-                    >
+                    <th className="px-6 py-4 text-left font-semibold border-b border-gray-200 dark:border-gray-700">
                       Keterangan
                     </th>
                   </tr>
@@ -435,33 +424,21 @@ export default function ApiDocs() {
                     <tr
                       key={idx}
                       className={
-                        idx % 2 === 0
-                          ? isDark
-                            ? "bg-gray-800/50"
-                            : "bg-gray-50/50"
-                          : ""
+                        idx % 2 === 0 ? "bg-gray-50/50 dark:bg-gray-800/50" : ""
                       }
                     >
-                      <td
-                        className={`px-6 py-4 ${theme.border} border-b font-medium`}
-                      >
+                      <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 font-medium">
                         {level.level}
                       </td>
-                      <td
-                        className={`px-6 py-4 ${theme.border} border-b ${theme.textSecondary}`}
-                      >
+                      <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                         {level.length}
                       </td>
-                      <td className={`px-6 py-4 ${theme.border} border-b`}>
-                        <code
-                          className={`${theme.codeBg} px-2 py-1 rounded text-sm ${theme.accentText}`}
-                        >
+                      <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <code className="bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded text-sm text-blue-600 dark:text-blue-400">
                           {level.example}
                         </code>
                       </td>
-                      <td
-                        className={`px-6 py-4 ${theme.border} border-b ${theme.textSecondary}`}
-                      >
+                      <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                         {level.desc}
                       </td>
                     </tr>
@@ -474,15 +451,9 @@ export default function ApiDocs() {
 
         {/* Notes */}
         <section>
-          <div
-            className={`${
-              isDark
-                ? "bg-yellow-900/20 border-yellow-700"
-                : "bg-yellow-50 border-yellow-200"
-            } border-l-4 rounded-r-xl p-6`}
-          >
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-700 rounded-r-xl p-6">
             <h3 className="text-xl font-bold mb-4">📝 Catatan Penting</h3>
-            <ul className={`space-y-2 ${theme.textSecondary}`}>
+            <ul className="space-y-2 text-gray-700 dark:text-gray-300">
               <li className="flex items-start gap-2">
                 <span className="text-yellow-500 mt-1">•</span>
                 <span>Semua response menggunakan format JSON</span>
@@ -503,15 +474,11 @@ export default function ApiDocs() {
                 <span className="text-yellow-500 mt-1">•</span>
                 <span>
                   Response error akan memiliki{" "}
-                  <code
-                    className={`${theme.codeBg} px-2 py-0.5 rounded text-sm`}
-                  >
+                  <code className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-sm">
                     success: false
                   </code>{" "}
                   dan field{" "}
-                  <code
-                    className={`${theme.codeBg} px-2 py-0.5 rounded text-sm`}
-                  >
+                  <code className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-sm">
                     error
                   </code>
                 </span>
@@ -526,9 +493,9 @@ export default function ApiDocs() {
       </main>
 
       {/* Footer */}
-      <footer className={`border-t ${theme.border} ${theme.cardBg} mt-20`}>
+      <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 mt-20">
         <div className="max-w-7xl mx-auto px-6 py-8 text-center">
-          <p className={theme.textSecondary}>
+          <p className="text-gray-600 dark:text-gray-400">
             API Wilayah Indonesia - Built with Next.js & ❤️
           </p>
         </div>
