@@ -1,7 +1,3 @@
-// ============================================
-// FILE: app/api/wilayah/provinsi/route.js
-// GET semua provinsi (kode 2 digit)
-// ============================================
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 

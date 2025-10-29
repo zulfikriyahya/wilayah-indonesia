@@ -1,7 +1,3 @@
-// ============================================
-// FILE: app/api/wilayah/[kode]/route.js
-// GET wilayah by kode (dengan kodepos jika ada)
-// ============================================
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 

@@ -1,7 +1,3 @@
-// ============================================
-// FILE: app/api/wilayah/route.js
-// GET semua wilayah dengan pagination & filter
-// ============================================
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 

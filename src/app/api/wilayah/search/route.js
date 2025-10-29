@@ -1,7 +1,3 @@
-// ============================================
-// FILE: app/api/wilayah/search/route.js
-// Search wilayah by nama
-// ============================================
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 

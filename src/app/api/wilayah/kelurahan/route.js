@@ -1,7 +1,3 @@
-// ============================================
-// FILE: app/api/wilayah/kelurahan/route.js
-// GET kelurahan/desa by kecamatan (dengan kodepos)
-// ============================================
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 
